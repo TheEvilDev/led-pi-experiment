@@ -39,7 +39,7 @@ const repeater = function(action, interval) {
 		},
 		stop: function() {
 			clearInterval(int);
-		};
+		}
 	};
 };
 
