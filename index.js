@@ -119,8 +119,8 @@ process.on('SIGINT', onExit); // Ensure we shut off all the lights when the prog
 	await timer(render(solid(colors.BLUE)), 1000);
 	await timer(render(solid(colors.GREEN)), 1000);
 	await timer(render(alternating(colors.RED, colors.HOTPINK)), 1000);
-	await timer(() => pulse(), 5000);
-	await timer(() => ledController.reset(), 1000);
+	await timer(() => pulse(), 1000);
+	await timer(() => ledController.reset(), 5000);
 })();
 
 /*
