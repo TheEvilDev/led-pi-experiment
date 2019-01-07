@@ -4,9 +4,11 @@ var colors = require('./colors');
 var _ = require('lodash');
 
 //// Variables - Change as you want
-const NUM_LEDS = 300;
+const NUM_LEDS = 150;
 const PRIMARY = colors.HOTPINK;
 const SECONDARY = colors.RED;
+
+ledController.init(NUM_LEDS); // Initialize the LED controller, needs to be called before any other function.
 
 //// Reusable Functions (Call them to apply affects)
 
@@ -78,7 +80,6 @@ const alternate = function(primary, secondary, speed) {
 };
 
 //// Main program code (Careful when modifying)
-ledController.init(NUM_LEDS); // Initialize the LED controller, needs to be called before any other function.
 
 // Setup exit handler to shut off all the lights if the program is killed unexpectedly.
 const onExit = function(options, exitCode) {
@@ -90,8 +91,7 @@ process.on('SIGINT', onExit); // Ensure we shut off all the lights when the prog
 
 
 //// Program sequence (change as much as you like)
-
-render(solid(colors.RED)); // Set all the lights to red
+setTimeout(() => render(solid(colors.RED)), 200); // Set all the lights to red
 setTimeout(() => render(solid(colors.BLUE)), 1000); // Turn them to blue after 1 second
 setTimeout(() => render(solid(colors.GREEN)), 2000); // Turn them to green after 2 seconds (From program start, not from last change).
 setTimeout(() => render(alternating(colors.RED, colors.HOTPINK)), 3000); // Alternate red and hotpink
