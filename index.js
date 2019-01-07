@@ -21,10 +21,32 @@ const alternating = function(primary, secondary) {
 	return _.times(NUM_LEDS, (i) => i % 2 === 0 ? primary : secondary); // Create an array the size of the total number of leds, where ever even numbered one is primary, every odd is secondary.
 };
 
+const timer = function(action, milliseconds) {
+	return new Promise((resolve, reject) {
+		setTimeout(() => {
+			action();
+			resolve();
+		}, milliseconds);
+	});
+};
+
+const repeater = function(action, interval) {
+	let int = null;
+
+	return {
+		start: function() {
+			int = setInterval(action, interval);
+		},
+		stop: function() {
+			clearInterval(int);
+		};
+	};
+};
+
 ///// Control functions (actually setting the states on the LEDS) 
 const render = function(data) {
 	ledController.render(data);
-}
+};
 
 const pulse = function(speed, stepRate) {
 	let brightness = 0; // Current brightness level (0-255);
@@ -90,7 +112,17 @@ const onExit = function(options, exitCode) {
 process.on('SIGINT', onExit); // Ensure we shut off all the lights when the program is killed.
 
 
+
 //// Program sequence (change as much as you like)
+(async() => {
+	await timer(render(solid(colors.RED)), 1000);
+	await timer(render(solid(colors.BLUE)), 1000);
+	await timer(render(solid(colors.GREEN)), 1000);
+	await timer(alternating(colors.RED, colors.HOTPINK), 1000);
+})();
+
+/*
+timer(render(solid(colors.RED)), 1000);
 setTimeout(() => render(solid(colors.RED)), 200); // Set all the lights to red
 setTimeout(() => render(solid(colors.BLUE)), 1000); // Turn them to blue after 1 second
 setTimeout(() => render(solid(colors.GREEN)), 2000); // Turn them to green after 2 seconds (From program start, not from last change).
@@ -118,3 +150,4 @@ setTimeout(() => {
 }, 30000);
 
 onExit(null, 0);
+*/
