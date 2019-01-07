@@ -23,15 +23,19 @@ const alternating = function(primary, secondary) {
 
 const timer = function(action, milliseconds) {
 	return new Promise((resolve, reject) => {
-		const animation = action();
-		
-		setTimeout(() => {
-			if(animation && animation.stop) {
-				animation.stop();
-			};
+		try {
+			const animation = action();
+			
+			setTimeout(() => {
+				if(animation && animation.stop) {
+					animation.stop();
+				};
 
-			resolve();
-		}, milliseconds);
+				resolve();
+			}, milliseconds);
+		} catch (e) {
+			reject(e);
+		};
 	});
 };
 
