@@ -1,83 +1,120 @@
+// Imports
 var ledController = require('rpi-ws281x-native');
+var colors = require('./colors');
 var _ = require('lodash');
 
+//// Variables - Change as you want
 const NUM_LEDS = 300;
+const PRIMARY = colors.HOTPINK;
+const SECONDARY = colors.RED;
 
-ledController.init(NUM_LEDS);
+//// Reusable Functions (Call them to apply affects)
 
-const RED = '0xff0000';
-const BLUE = '0x0000ff';
-const GREEN = '0x00ff00';
-const HOTPINK = '0xff69b4';
-const YELLOW = '0xFFFF00';
-const GOLD = '0xFFD700';
-const BLACK = '0x000000';
-const PRIMARY = HOTPINK;
-const SECONDARY = RED;
-
-var allRed = _.times(NUM_LEDS, function() { return RED; });
-var allBlue = _.times(NUM_LEDS, function() { return BLUE; });
-var allGreen = _.times(NUM_LEDS, function() { return GREEN; });
-var alternating = _.times(NUM_LEDS, function(index) { if( index % 2 === 0) { return PRIMARY; } else { return SECONDARY; } });
-var alternating2 = _.times(NUM_LEDS, function(index) { if( index % 2 === 0) { return SECONDARY; } else { return PRIMARY; } });
-
-/*
-ledController.render(allRed);
-
-setTimeout(() => ledController.render(allBlue), 5000);
-setTimeout(() => ledController.render(alternating), 15000);
-setTimeout(() => ledController.render(allGreen), 10000);
-setTimeout(() => ledController.reset(), 20000);
-*/
-
-var isRed = false;
-
-var solid = function(color) {
-	var leds = _.times(NUM_LEDS, function() { return color; });
-	ledController.render(leds);
+///// Helper functions for creating LED states
+const solid = function(color) {
+	return _.times(NUM_LEDS, () => color); // Create an artifical array the size of the total number of LEDs, with all values set to the same color.
 };
 
-var cleanup = function(options, exitCode) {
-	ledController.reset();
+const alternating = function(primary, secondary) {
+	return _.times(NUM_LEDS, (i) => i % 2 === 0 ? primary : secondary); // Create an array the size of the total number of leds, where ever even numbered one is primary, every odd is secondary.
+};
+
+///// Control functions (actually setting the states on the LEDS) 
+const render = function(data) {
+	ledController.render(data);
+}
+
+const pulse = function(speed, stepRate) {
+	let brightness = 0; // Current brightness level (0-255);
+	let ascending = true; // Should be getting brighter
+	let increment = stepRate || 5; // How much should we adjust brightness on each interval
+
+	const interval = setInterval(() => {
+		if (ascending) {
+			brightness += increment; // Increase the brightness variable by the increment.
+			if(brightness > 255) { brightness = 255 }; // Ensure we don't pass a value greater than the max
+
+			if(brightness === 255) {
+				ascending = false; // Lights at max brightness, start dimming.
+			}
+		} else {
+			brightness -= increment;
+			if(brightness < 0) { brightness = 0 }; // Ensure we don't pass a value less than 0
+
+			if(brightness === 0) {
+				ascending = true; // Lights totally off, time to get brighter again.
+			}
+		}
+
+		ledController.setBrightness(brightness); // Actually set the brightness of the lights.
+
+	}, speed || 25 /* How often we should adjust brightness */);
+
+	return {
+		stop: () => {
+			clearInterval(interval); // Stop pulsing.
+		}
+	}
+}
+
+const alternate = function(primary, secondary, speed) {
+	let isPrimary = false;
+
+	const interval = setInterval(() => {
+		if(isPrimary) {
+			ledController.render(secondary);
+			isPrimary = false;
+		} else {
+			ledController.render(primary);
+			isPrimary = true;
+		}
+	}, speed || 1000); // Rate at which to change, default 1 second. (milliseconds)
+
+	return {
+		stop: () => {
+			clearInterval(interval)
+		}
+	}
+};
+
+//// Main program code (Careful when modifying)
+ledController.init(NUM_LEDS); // Initialize the LED controller, needs to be called before any other function.
+
+// Setup exit handler to shut off all the lights if the program is killed unexpectedly.
+const onExit = function(options, exitCode) {
+	ledController.reset(); // Turn off all the lights
 	process.exitCode = exitCode || 0;
 };
 
-process.on('SIGINT', cleanup);
+process.on('SIGINT', onExit); // Ensure we shut off all the lights when the program is killed.
 
-var alternate = function(interval) {
 
-setInterval(function() { 
-	if(isRed) {
-		ledController.render(alternating);
-		isRed = false;
-	} else {
-		ledController.render(alternating2);
-		isRed = true;
-	}
-}, interval);
-};
+//// Program sequence (change as much as you like)
 
-var fade = function() {
-	var brightness = 0;
-	var ascending = true;
+render(solid(colors.RED)); // Set all the lights to red
+setTimeout(() => render(solid(colors.BLUE)), 1000); // Turn them to blue after 1 second
+setTimeout(() => render(solid(colors.GREEN)), 2000); // Turn them to green after 2 seconds (From program start, not from last change).
+setTimeout(() => render(alternating(colors.RED, colors.HOTPINK)), 3000); // Alternate red and hotpink
+setTimeout(() => {
+	const animation = alternate(solid(colors.BLUE), solid(colors.GREEN));
 
-	setInterval(function() {
-		if(ascending) {
-			brightness += 5;
-			if(brightness === 255) {
-				ascending = false;
-			}
-		} else {
-			brightness -= 5;
-			if(brightness === 0) {
-				ascending = true;
-			}
-		}
-		ledController.setBrightness(brightness);
-	}, 30);
-};
+	setTimeout(() => animation.stop, 10000); // Stop animation after 10 seconds
+}, 10000); // Alternate between blue and green
 
-solid(HOTPINK);
-fade();
+// Cool jiggle effect
+setTimeout(() => {
+	const animation = alternate(alternating(colors.RED, colors.HOTPINK), alternating(colors.HOTPINK, colors.RED)); // Alternate between alternating states (cool jiggle effect)
 
-// alternate(500);
+	setTimeout(() => animation.stop, 10000); // Stop animation after 10 seconds
+}, 20000); 
+
+// Cool pulsing effect
+setTimeout(() => {
+	render(solid(colors.RED));
+
+	const animation = pulse();
+
+	setTimeout(() => animation.stop, 10000);
+}, 30000);
+
+onExit(null, 0);
