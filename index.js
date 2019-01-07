@@ -122,8 +122,6 @@ const onExit = function(options, exitCode) {
 
 process.on('SIGINT', onExit); // Ensure we shut off all the lights when the program is killed.
 
-
-
 //// Program sequence (change as much as you like)
 (async() => {
 	try {
