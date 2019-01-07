@@ -91,23 +91,25 @@ const pulse = function(speed, stepRate) {
 }
 
 const alternate = function(primary, secondary, speed) {
-	let isPrimary = false;
+	return () => {
+		let isPrimary = false;
 
-	const interval = setInterval(() => {
-		if(isPrimary) {
-			ledController.render(secondary);
-			isPrimary = false;
-		} else {
-			ledController.render(primary);
-			isPrimary = true;
-		}
-	}, speed || 1000); // Rate at which to change, default 1 second. (milliseconds)
+		const interval = setInterval(() => {
+			if(isPrimary) {
+				ledController.render(secondary);
+				isPrimary = false;
+			} else {
+				ledController.render(primary);
+				isPrimary = true;
+			}
+		}, speed || 1000); // Rate at which to change, default 1 second. (milliseconds)
 
-	return {
-		stop: () => {
-			clearInterval(interval)
+		return {
+			stop: () => {
+				clearInterval(interval)
+			}
 		}
-	}
+	};
 };
 
 //// Main program code (Careful when modifying)
