@@ -22,7 +22,7 @@ const alternating = function(primary, secondary) {
 };
 
 const timer = function(action, milliseconds) {
-	return new Promise((resolve, reject) {
+	return new Promise((resolve, reject) => {
 		setTimeout(() => {
 			action();
 			resolve();
