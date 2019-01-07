@@ -45,7 +45,7 @@ const repeater = function(action, interval) {
 
 ///// Control functions (actually setting the states on the LEDS) 
 const render = function(data) {
-	ledController.render(data);
+	return () => ledController.render(data);
 };
 
 const pulse = function(speed, stepRate) {
