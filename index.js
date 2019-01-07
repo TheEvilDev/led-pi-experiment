@@ -124,43 +124,17 @@ process.on('SIGINT', onExit); // Ensure we shut off all the lights when the prog
 
 //// Program sequence (change as much as you like)
 (async() => {
-	await timer(render(solid(colors.RED)), 1000);
-	await timer(render(solid(colors.BLUE)), 1000);
-	await timer(render(solid(colors.GREEN)), 1000);
-	await timer(render(alternating(colors.RED, colors.HOTPINK)), 1000);
-	await timer(pulse, 5000);
-	await timer(alternate(solid(colors.YELLOW), solid(colors.RED)), 5000);
-
-	ledController.reset();
+	try {
+		await timer(render(solid(colors.RED)), 1000);
+		await timer(render(solid(colors.BLUE)), 1000);
+		await timer(render(solid(colors.GREEN)), 1000);
+		await timer(render(alternating(colors.RED, colors.HOTPINK)), 1000);
+		await timer(pulse, 5000);
+		await timer(alternate(solid(colors.YELLOW), solid(colors.RED)), 5000);
+	} catch (e) {
+		console.error(e);
+		process.exitCode = 1;
+	} finally {
+		ledController.reset();
+	}
 })();
-
-/*
-timer(render(solid(colors.RED)), 1000);
-setTimeout(() => render(solid(colors.RED)), 200); // Set all the lights to red
-setTimeout(() => render(solid(colors.BLUE)), 1000); // Turn them to blue after 1 second
-setTimeout(() => render(solid(colors.GREEN)), 2000); // Turn them to green after 2 seconds (From program start, not from last change).
-setTimeout(() => render(alternating(colors.RED, colors.HOTPINK)), 3000); // Alternate red and hotpink
-setTimeout(() => {
-	const animation = alternate(solid(colors.BLUE), solid(colors.GREEN));
-
-	setTimeout(() => animation.stop, 10000); // Stop animation after 10 seconds
-}, 10000); // Alternate between blue and green
-
-// Cool jiggle effect
-setTimeout(() => {
-	const animation = alternate(alternating(colors.RED, colors.HOTPINK), alternating(colors.HOTPINK, colors.RED)); // Alternate between alternating states (cool jiggle effect)
-
-	setTimeout(() => animation.stop, 10000); // Stop animation after 10 seconds
-}, 20000); 
-
-// Cool pulsing effect
-setTimeout(() => {
-	render(solid(colors.RED));
-
-	const animation = pulse();
-
-	setTimeout(() => animation.stop, 10000);
-}, 30000);
-
-onExit(null, 0);
-*/
