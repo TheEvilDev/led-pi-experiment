@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node ./index.js",
+    "sync": "rsync -v -e ssh /Users/mitchlee/workbench/experiments/led-experiment mlee@raspi-led.local:/home/mlee/workbench --exclude '.git' --exclude 'node_modules' -r -a",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "fauxmojs": "^1.0.3",
+    "graphql-codegen-typescript-client": "^0.15.2",
+    "ip": "^1.1.5",
     "lodash": "^4.17.11",
     "rpi-ws281x-native": "^0.9.0"
   }
